@@ -40,6 +40,7 @@ jobs:
             context: ./frontend/
             push: true
             tags: ${{ secrets.DOCKER_USER }}/docker-project-frontend:latest
+            load: true
         - name: Scan Frontend with Trivy
           uses: aquasecurity/trivy-action@master
           with:
