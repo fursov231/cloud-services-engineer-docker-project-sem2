@@ -24,7 +24,6 @@ services:
         reservations:
           cpus: 0.5
           memory: 512M
-    read_only: true
 
   backend:
     image: fursov231/docker-project-backend:latest
