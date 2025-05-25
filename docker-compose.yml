@@ -1,0 +1,64 @@
+services:
+  frontend:
+    image: fursov231/docker-project-frontend:latest
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app-network
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/momo-store"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 1024M
+        reservations:
+          cpus: 0.5
+          memory: 512M
+
+  backend:
+    image: fursov231/docker-project-backend:latest
+    container_name: backend
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 1024M
+        reservations:
+          cpus: 0.5
+          memory: 512M
+    read_only: true
+
+networks:
+  app-network:
+    driver: bridge
