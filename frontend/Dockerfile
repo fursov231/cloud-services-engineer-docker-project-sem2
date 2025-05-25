@@ -10,11 +10,21 @@ COPY . .
 
 RUN npm run build
 
-FROM nginxinc/nginx-unprivileged:alpine
+FROM nginx:stable-alpine3.21
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+RUN mkdir -p /etc/nginx/conf.d
+
+COPY --chown=appuser:appgroup nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=builder /app/dist /usr/share/nginx/html
+
+RUN chown -R appuser:appgroup /var/cache/nginx/ && \
+    touch /var/run/nginx.pid && \
+    chown -R appuser:appgroup /var/run/nginx.pid
+
+USER appuser
 
 EXPOSE 80
 
